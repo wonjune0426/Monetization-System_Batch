@@ -1,10 +1,13 @@
-package com.example.SpringBatch.entity;
+package com.example.SpringBatch.entity.statisitcs;
 
+import com.example.SpringBatch.entity.Video;
 import com.example.SpringBatch.entity.timestapm.CreateTimestamped;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -24,4 +27,10 @@ public class VideoStatistics extends CreateTimestamped {
 
     @Column(nullable = false)
     private Long videoPlaytime;
+
+    public VideoStatistics(Video video, Long videoView, Long videoPlaytime) {
+        this.video = video;
+        this.videoView = videoView;
+        this.videoPlaytime = videoPlaytime;
+    }
 }

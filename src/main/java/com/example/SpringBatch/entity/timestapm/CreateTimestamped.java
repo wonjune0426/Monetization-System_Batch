@@ -1,12 +1,14 @@
 package com.example.SpringBatch.entity.timestapm;
 
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @MappedSuperclass
@@ -15,6 +17,5 @@ public class CreateTimestamped {
 
     @CreatedDate
     @Column(updatable = false)
-    @Temporal(TemporalType.DATE)
-    private Date created_at;
+    private LocalDate created_at;
 }

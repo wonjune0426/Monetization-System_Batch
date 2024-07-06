@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class AdViewHistory extends CreateTimestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long adviewId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_ad_id")

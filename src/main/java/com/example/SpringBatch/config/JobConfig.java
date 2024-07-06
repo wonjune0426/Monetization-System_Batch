@@ -1,59 +1,55 @@
 package com.example.SpringBatch.config;
 
-import jakarta.persistence.EntityManagerFactory;
+import com.example.SpringBatch.tasklet.AdCalculateTasklet;
+import com.example.SpringBatch.tasklet.AdStatisticsTasklet;
+import com.example.SpringBatch.tasklet.VideoCalculateTasklet;
+import com.example.SpringBatch.tasklet.VideoStatisticsTasklet;
 import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
 public class JobConfig {
+    private final VideoStatisticsTasklet videoStatisticsTasklet;
+    private final AdStatisticsTasklet adStatisticsTasklet;
+    private final VideoCalculateTasklet videoCalculateTasklet;
+    private final AdCalculateTasklet adCalculateTasklet;
 
-//    private final VideoRepository videoRepository;
-    private final EntityManagerFactory serviceEntityManagerFactory;
-//
-//    @Bean
-//    public Job sampleJob(JobRepository jobRepository, Step todayVideoViewCountStep) {
-//        return new JobBuilder("Calculate", jobRepository)
-//                .start(todayVideoViewCountStep)
-//                .incrementer(new RunIdIncrementer())
-//                .build();
-//    }
-//
-//
-//    @Bean
-//    public Step todayVideoViewCountStep(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager,
-//                                   ItemReader<HashMap<String, Object>> itemReader) {
-//        return new StepBuilder("videoViewCount", jobRepository)
-//                .<HashMap<String, Object>, Calculate>chunk(10, serviceTransactionManager)
-//                .reader(itemReader)
-//                .processor(processor())
-//                .writer(writer())
-//                .build();
-//    }
-//
-//    @Bean
-//    public JpaPagingItemReader<HashMap<String, Object>> reader() {
-//        return new JpaPagingItemReaderBuilder<HashMap<String, Object>>()
-//                .name("videoViewReader")
-//                .entityManagerFactory(serviceEntityManagerFactory)
-//                .queryString("SELECT new map(v.video.video_id as video_id, SUM(v.view_count) as view_count) " +
-//                        "FROM VideoView_History v WHERE DATE(v.updated_at) = DATE('2024-03-14') GROUP BY v.video.video_id")
-//                .pageSize(10)
-//                .build();
-//    }
-//
-//    @Bean
-//    public ItemProcessor<HashMap<String, Object>, Calculate> processor() {
-//        return items -> new Calculate(videoRepository.findById(UUID.fromString(items.get("video_id").toString())).orElseThrow(),
-//                (Long)items.get("view_count"));
-//    }
-//
-//    @Bean
-//    public JpaItemWriter<Calculate> writer() {
-//        JpaItemWriter<Calculate> jpaItemWriter = new JpaItemWriter<>();
-//        jpaItemWriter.setEntityManagerFactory(serviceEntityManagerFactory);
-//        return jpaItemWriter;
-//    }
+    @Bean
+    public Job myJob(JobRepository jobRepository,@Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+        return new JobBuilder("myJob", jobRepository)
+                .start(statistics(jobRepository,serviceTransactionManager))
+                .next(calculate(jobRepository,serviceTransactionManager))
+                .incrementer(new RunIdIncrementer())
+                .build();
+    }
+
+    @Bean
+    public Step statistics(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+        return new StepBuilder("statistics",jobRepository)
+                .tasklet(videoStatisticsTasklet,serviceTransactionManager)
+                .tasklet(adStatisticsTasklet,serviceTransactionManager)
+                .build();
+    }
+
+    @Bean
+    public Step calculate(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+        return new StepBuilder("calculate",jobRepository)
+                .tasklet(videoCalculateTasklet,serviceTransactionManager)
+                .tasklet(adCalculateTasklet,serviceTransactionManager)
+                .build();
+    }
+
+
 
 
 }

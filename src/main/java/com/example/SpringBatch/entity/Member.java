@@ -17,7 +17,7 @@ public class Member extends MainTimestamped {
     @Column(length = 50)
     private String memberId;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
