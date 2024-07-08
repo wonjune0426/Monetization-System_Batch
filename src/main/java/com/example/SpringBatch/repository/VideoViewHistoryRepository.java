@@ -1,13 +1,13 @@
 package com.example.SpringBatch.repository;
 
-import com.example.SpringBatch.projection.VideoStatsProjection;
 import com.example.SpringBatch.entity.VideoViewHistory;
+import com.example.SpringBatch.projection.VideoStatsProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.ArrayList;
 
 public interface VideoViewHistoryRepository extends JpaRepository<VideoViewHistory, Long> {
 
@@ -17,5 +17,5 @@ public interface VideoViewHistoryRepository extends JpaRepository<VideoViewHisto
             "WHERE created_at = :findDate " +
             "GROUP BY video_id",
             nativeQuery = true)
-    List<VideoStatsProjection> findVideoStatsByLocalDate(@Param("findDate") LocalDate findDate);
+    ArrayList<VideoStatsProjection> findVideoStatsByLocalDate(@Param("findDate") LocalDate findDate);
 }

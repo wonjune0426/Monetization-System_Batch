@@ -22,4 +22,9 @@ public class VideoCalculate extends CreateTimestamped {
 
     @Column(nullable = false)
     private Long videoAmount;
+
+    public VideoCalculate(Video video, Long videoAmount) {
+        this.video = video;
+        this.videoAmount = videoAmount;
+    }
 }

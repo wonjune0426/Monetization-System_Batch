@@ -1,44 +1,82 @@
 package com.example.SpringBatch.tasklet;
 
 import com.example.SpringBatch.entity.Video;
-import com.example.SpringBatch.projection.VideoStatsProjection;
+import com.example.SpringBatch.entity.calculate.VideoCalculate;
+import com.example.SpringBatch.entity.statisitcs.VideoStatistics;
 import com.example.SpringBatch.repository.VideoRepository;
+import com.example.SpringBatch.repository.calculate.VideoCalculateRepository;
+import com.example.SpringBatch.repository.statisitcs.VideoStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 
+@StepScope
 @Component
 @RequiredArgsConstructor
 public class VideoCalculateTasklet implements Tasklet {
 
     private final VideoRepository videoRepository;
+    private final VideoStatisticsRepository videoStatisticsRepository;
+    private final VideoCalculateRepository videoCalculateRepository;
+
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        // 통계 Step에서 정산 된 값을 가져 옴
-        List<VideoStatsProjection> videoStatsProjectionList = (List<VideoStatsProjection>) chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().get("videoStatsProjectionList");
+        List<VideoStatistics> videoStatisticsList = videoStatisticsRepository.findAllByCreatedAt(LocalDate.now());
 
-        for (VideoStatsProjection videoStatsProjection : videoStatsProjectionList) {
-            // video 테이블에서 해당 video객체 조회
-            Video video = videoRepository.findById(videoStatsProjection.getVideoId()).orElseThrow(
+        for (VideoStatistics videoStatistics : videoStatisticsList) {
+            System.out.println("===============================================");
+            System.out.println(videoStatistics.getVideo());
+
+            // 해당 video 존재 여부 확인
+            Video video = videoRepository.findById(videoStatistics.getVideo().getVideoId()).orElseThrow(
                     ()-> new RuntimeException("Video not found")
             );
 
-            // 이전 날짜의 누적 조회 수 계산
-            Long startView = video.getTotalView() - videoStatsProjection.getVideoView();
+            // 당일 조회 수
+            Long todayView = videoStatistics.getVideoView();
 
+            // 전날 까지의 누적 조회 수
+            Long accumulateView = video.getTotalView() - todayView;
+
+
+            VideoCalculate videoCalculate = new VideoCalculate(video,calculateAmount(accumulateView,todayView));
+            videoCalculateRepository.save(videoCalculate);
         }
 
 
-        return null;
+        return RepeatStatus.FINISHED;
     }
 
 
+    private Long calculateAmount(Long accumulateView, Long todayView) {
+        double videoAmount = 0.0;  // 정산할 금액 저장
+        long[] thresholds = {100000L, 500000L, 1000000L}; // 기준 점이 되는 조회 수
+        double[] multipliers = {1.0, 1.1, 1.3, 1.5};  // 각각의 조회 수 마다의 단가
 
+        for (int i = 0; i < thresholds.length; i++) {
+            if (accumulateView < thresholds[i]) {
+                long checkView = thresholds[i] - accumulateView;
+                if (todayView <= checkView) {
+                    videoAmount += todayView * multipliers[i];
+                    return (long) videoAmount;
+                } else {
+                    videoAmount += checkView * multipliers[i];
+                    todayView -= checkView;
+                    accumulateView += checkView;
+                }
+            }
+        }
+        // 1,000,000 이상의 경우
+        videoAmount += todayView * multipliers[multipliers.length - 1];
+        return (long) videoAmount;
+    }
 }

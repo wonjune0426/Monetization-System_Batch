@@ -16,6 +16,6 @@ import java.time.LocalDate;
 public class CreateTimestamped {
 
     @CreatedDate
-    @Column(updatable = false)
-    private LocalDate created_at;
+    @Column(updatable = false,name = "created_at")
+    private LocalDate createdAt;
 }

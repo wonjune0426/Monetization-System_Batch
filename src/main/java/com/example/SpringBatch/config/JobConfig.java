@@ -7,6 +7,7 @@ import com.example.SpringBatch.tasklet.VideoStatisticsTasklet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
@@ -20,29 +21,44 @@ import org.springframework.transaction.PlatformTransactionManager;
 @RequiredArgsConstructor
 public class JobConfig {
     private final VideoStatisticsTasklet videoStatisticsTasklet;
-    private final AdStatisticsTasklet adStatisticsTasklet;
     private final VideoCalculateTasklet videoCalculateTasklet;
+    private final AdStatisticsTasklet adStatisticsTasklet;
     private final AdCalculateTasklet adCalculateTasklet;
 
     @Bean
-    public Job myJob(JobRepository jobRepository,@Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+    public Job myJob(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
         return new JobBuilder("myJob", jobRepository)
-                .start(statistics(jobRepository,serviceTransactionManager))
-                .next(calculate(jobRepository,serviceTransactionManager))
                 .incrementer(new RunIdIncrementer())
+                .start(videoStatistics(jobRepository, serviceTransactionManager))
+                .next(videoCalculate(jobRepository,serviceTransactionManager))
+//                .next(adStatistics(jobRepository,serviceTransactionManager))
+//                .next(adCalculate(jobRepository,serviceTransactionManager))
                 .build();
     }
 
+
+
+
+    @JobScope
     @Bean
-    public Step statistics(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
-        return new StepBuilder("statistics",jobRepository)
+    public Step videoStatistics(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+        return new StepBuilder("videoStatistics", jobRepository)
                 .tasklet(videoStatisticsTasklet,serviceTransactionManager)
-                .tasklet(adStatisticsTasklet,serviceTransactionManager)
                 .build();
     }
 
+
+    @JobScope
     @Bean
-    public Step calculate(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+    public Step videoCalculate(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+        return new StepBuilder("videoCalculate", jobRepository)
+                .tasklet(videoCalculateTasklet,serviceTransactionManager)
+                .build();
+    }
+
+
+    @Bean
+    public Step adStatistics(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
         return new StepBuilder("calculate",jobRepository)
                 .tasklet(videoCalculateTasklet,serviceTransactionManager)
                 .tasklet(adCalculateTasklet,serviceTransactionManager)
@@ -50,6 +66,10 @@ public class JobConfig {
     }
 
 
+    @Bean
+    public Step adCalculate(JobRepository jobRepository,@Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+        return null;
+    }
 
 
 }
