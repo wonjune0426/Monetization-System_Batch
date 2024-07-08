@@ -22,4 +22,9 @@ public class AdCalculate extends CreateTimestamped {
 
     @Column(nullable = false)
     private Long adAmount;
+
+    public AdCalculate(VideoAd videoAd, Long adAmount) {
+        this.videoAd = videoAd;
+        this.adAmount = adAmount;
+    }
 }

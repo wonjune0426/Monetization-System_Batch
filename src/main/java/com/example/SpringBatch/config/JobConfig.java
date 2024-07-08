@@ -31,8 +31,8 @@ public class JobConfig {
                 .incrementer(new RunIdIncrementer())
                 .start(videoStatistics(jobRepository, serviceTransactionManager))
                 .next(videoCalculate(jobRepository,serviceTransactionManager))
-//                .next(adStatistics(jobRepository,serviceTransactionManager))
-//                .next(adCalculate(jobRepository,serviceTransactionManager))
+                .next(adStatistics(jobRepository,serviceTransactionManager))
+                .next(adCalculate(jobRepository,serviceTransactionManager))
                 .build();
     }
 
@@ -57,18 +57,21 @@ public class JobConfig {
     }
 
 
+    @JobScope
     @Bean
     public Step adStatistics(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
-        return new StepBuilder("calculate",jobRepository)
-                .tasklet(videoCalculateTasklet,serviceTransactionManager)
-                .tasklet(adCalculateTasklet,serviceTransactionManager)
+        return new StepBuilder("adStatistics",jobRepository)
+                .tasklet(adStatisticsTasklet,serviceTransactionManager)
                 .build();
     }
 
 
+    @JobScope
     @Bean
     public Step adCalculate(JobRepository jobRepository,@Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
-        return null;
+        return new StepBuilder("adCalculate",jobRepository)
+                .tasklet(adCalculateTasklet,serviceTransactionManager)
+                .build();
     }
 
 

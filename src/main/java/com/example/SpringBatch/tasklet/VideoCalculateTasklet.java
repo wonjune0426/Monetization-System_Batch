@@ -33,8 +33,6 @@ public class VideoCalculateTasklet implements Tasklet {
         List<VideoStatistics> videoStatisticsList = videoStatisticsRepository.findAllByCreatedAt(LocalDate.now());
 
         for (VideoStatistics videoStatistics : videoStatisticsList) {
-            System.out.println("===============================================");
-            System.out.println(videoStatistics.getVideo());
 
             // 해당 video 존재 여부 확인
             Video video = videoRepository.findById(videoStatistics.getVideo().getVideoId()).orElseThrow(
@@ -42,10 +40,10 @@ public class VideoCalculateTasklet implements Tasklet {
             );
 
             // 당일 조회 수
-            Long todayView = videoStatistics.getVideoView();
+            long todayView = videoStatistics.getVideoView();
 
             // 전날 까지의 누적 조회 수
-            Long accumulateView = video.getTotalView() - todayView;
+            long accumulateView = video.getTotalView() - todayView;
 
 
             VideoCalculate videoCalculate = new VideoCalculate(video,calculateAmount(accumulateView,todayView));
@@ -57,17 +55,17 @@ public class VideoCalculateTasklet implements Tasklet {
     }
 
 
-    private Long calculateAmount(Long accumulateView, Long todayView) {
+    private long calculateAmount(Long accumulateView, Long todayView) {
         double videoAmount = 0.0;  // 정산할 금액 저장
         long[] thresholds = {100000L, 500000L, 1000000L}; // 기준 점이 되는 조회 수
-        double[] multipliers = {1.0, 1.1, 1.3, 1.5};  // 각각의 조회 수 마다의 단가
+        double[] multipliers = {1.0, 1.1, 1.3, 1.5};   // 각각의 조회 수 마다의 단가
 
         for (int i = 0; i < thresholds.length; i++) {
             if (accumulateView < thresholds[i]) {
                 long checkView = thresholds[i] - accumulateView;
                 if (todayView <= checkView) {
                     videoAmount += todayView * multipliers[i];
-                    return (long) videoAmount;
+                    return (long)videoAmount;
                 } else {
                     videoAmount += checkView * multipliers[i];
                     todayView -= checkView;
@@ -77,6 +75,6 @@ public class VideoCalculateTasklet implements Tasklet {
         }
         // 1,000,000 이상의 경우
         videoAmount += todayView * multipliers[multipliers.length - 1];
-        return (long) videoAmount;
+        return (long)videoAmount;
     }
 }

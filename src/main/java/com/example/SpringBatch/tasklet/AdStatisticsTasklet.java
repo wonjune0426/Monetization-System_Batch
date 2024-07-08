@@ -7,6 +7,7 @@ import com.example.SpringBatch.repository.VideoAdRepository;
 import com.example.SpringBatch.repository.statisitcs.AdStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.List;
 
+@StepScope
 @Component
 @RequiredArgsConstructor
 public class AdStatisticsTasklet implements Tasklet {
