@@ -28,7 +28,7 @@ public class AdStatisticsTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        List<AdStatsProjection> adStatsProjectionList = adViewHistoryRepository.findAdStatsByLocalDate(LocalDate.now());
+        List<AdStatsProjection> adStatsProjectionList = adViewHistoryRepository.findAdStatsByLocalDate(LocalDate.now().minusDays(1));
         for (AdStatsProjection adStatsProjection : adStatsProjectionList) {
             AdStatistics adStatistics = new AdStatistics(
                     videoAdRepository.findById(adStatsProjection.getVideoAdId()).orElseThrow(

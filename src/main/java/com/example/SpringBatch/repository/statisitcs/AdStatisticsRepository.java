@@ -7,5 +7,5 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface AdStatisticsRepository extends JpaRepository<AdStatistics, Long> {
-    List<AdStatistics> findAllByCreatedAt(LocalDate now);
+    List<AdStatistics> findAllByCreatedAt(LocalDate localDate);
 }

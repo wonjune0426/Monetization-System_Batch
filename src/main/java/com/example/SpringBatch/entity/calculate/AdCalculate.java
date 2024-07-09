@@ -1,17 +1,18 @@
 package com.example.SpringBatch.entity.calculate;
 
 import com.example.SpringBatch.entity.VideoAd;
-import com.example.SpringBatch.entity.timestapm.CreateTimestamped;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdCalculate extends CreateTimestamped {
+public class AdCalculate{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long adCalculateId;
@@ -22,6 +23,9 @@ public class AdCalculate extends CreateTimestamped {
 
     @Column(nullable = false)
     private Long adAmount;
+
+    @Column(nullable = false)
+    private LocalDate createdAt = LocalDate.now().minusDays(1);
 
     public AdCalculate(VideoAd videoAd, Long adAmount) {
         this.videoAd = videoAd;

@@ -30,7 +30,7 @@ public class VideoCalculateTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        List<VideoStatistics> videoStatisticsList = videoStatisticsRepository.findAllByCreatedAt(LocalDate.now());
+        List<VideoStatistics> videoStatisticsList = videoStatisticsRepository.findAllByCreatedAt(LocalDate.now().minusDays(1));
 
         for (VideoStatistics videoStatistics : videoStatisticsList) {
 

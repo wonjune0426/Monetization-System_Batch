@@ -7,5 +7,5 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface VideoStatisticsRepository extends JpaRepository<VideoStatistics, Long> {
-    List<VideoStatistics> findAllByCreatedAt(LocalDate localDate);
+    List<VideoStatistics> findAllByCreatedAt(LocalDate createdAt);
 }

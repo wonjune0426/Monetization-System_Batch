@@ -28,7 +28,7 @@ public class VideoStatisticsTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        ArrayList<VideoStatsProjection> videoStatsProjectionList = videoViewHistoryRepository.findVideoStatsByLocalDate(LocalDate.now());
+        ArrayList<VideoStatsProjection> videoStatsProjectionList = videoViewHistoryRepository.findVideoStatsByLocalDate(LocalDate.now().minusDays(1));
         for (VideoStatsProjection videoStatsProjection : videoStatsProjectionList) {
             VideoStatistics videoStatistics = new VideoStatistics(
                     videoRepository.findById(videoStatsProjection.getVideoId()).orElseThrow(

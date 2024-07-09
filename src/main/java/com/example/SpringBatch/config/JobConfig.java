@@ -37,8 +37,6 @@ public class JobConfig {
     }
 
 
-
-
     @JobScope
     @Bean
     public Step videoStatistics(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {

@@ -28,7 +28,7 @@ public class AdCalculateTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<AdStatistics> adStatisticsList = adStatisticsRepository.findAllByCreatedAt(LocalDate.now());
+        List<AdStatistics> adStatisticsList = adStatisticsRepository.findAllByCreatedAt(LocalDate.now().minusDays(1));
         for (AdStatistics adStatistics : adStatisticsList) {
             VideoAd videoAd = videoAdRepository.findById(adStatistics.getVideoAd().getVideoAdId()).orElseThrow(
                     ()-> new RuntimeException("Video Ad not found")
