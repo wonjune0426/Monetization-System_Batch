@@ -1,4 +1,4 @@
-package com.example.SpringBatch.tasklet;
+package com.example.SpringBatch.job.tasklet;
 
 import com.example.SpringBatch.entity.VideoAd;
 import com.example.SpringBatch.entity.calculate.AdCalculate;

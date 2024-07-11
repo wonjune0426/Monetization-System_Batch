@@ -1,9 +1,7 @@
 package com.example.SpringBatch.entity;
 
 import com.example.SpringBatch.entity.timestapm.MainTimestamped;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,15 +11,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Member extends MainTimestamped {
+
     @Id
-    @Column(length = 50)
     private String memberId;
 
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
-    private Boolean authority;
+    @Enumerated(value = EnumType.STRING)
+    private MemberRoleEnum authority;
 
     @Column(length = 20)
     private String social;

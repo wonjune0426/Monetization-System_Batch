@@ -1,7 +1,7 @@
-package com.example.SpringBatch.tasklet;
+package com.example.SpringBatch.job.tasklet;
 
 import com.example.SpringBatch.entity.statisitcs.AdStatistics;
-import com.example.SpringBatch.projection.AdStatsProjection;
+import com.example.SpringBatch.dto.AdStats;
 import com.example.SpringBatch.repository.AdViewHistoryRepository;
 import com.example.SpringBatch.repository.VideoAdRepository;
 import com.example.SpringBatch.repository.statisitcs.AdStatisticsRepository;
@@ -28,12 +28,12 @@ public class AdStatisticsTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        List<AdStatsProjection> adStatsProjectionList = adViewHistoryRepository.findAdStatsByLocalDate(LocalDate.now().minusDays(1));
-        for (AdStatsProjection adStatsProjection : adStatsProjectionList) {
+        List<AdStats> adStatsList = adViewHistoryRepository.findAdStatsByLocalDate(LocalDate.now().minusDays(1));
+        for (AdStats adStats : adStatsList) {
             AdStatistics adStatistics = new AdStatistics(
-                    videoAdRepository.findById(adStatsProjection.getVideoAdId()).orElseThrow(
+                    videoAdRepository.findById(adStats.getVideoAdId()).orElseThrow(
                             ()-> new IllegalArgumentException("존재 하지 않는 VideoAd 입니다.")
-                    ),adStatsProjection.getAdView()
+                    ), adStats.getAdView()
             );
             adStatisticsRepository.save(adStatistics);
         }

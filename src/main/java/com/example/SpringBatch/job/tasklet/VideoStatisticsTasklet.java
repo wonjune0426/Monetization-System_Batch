@@ -1,7 +1,7 @@
-package com.example.SpringBatch.tasklet;
+package com.example.SpringBatch.job.tasklet;
 
 import com.example.SpringBatch.entity.statisitcs.VideoStatistics;
-import com.example.SpringBatch.projection.VideoStatsProjection;
+import com.example.SpringBatch.dto.VideoStats;
 import com.example.SpringBatch.repository.VideoRepository;
 import com.example.SpringBatch.repository.VideoViewHistoryRepository;
 import com.example.SpringBatch.repository.statisitcs.VideoStatisticsRepository;
@@ -14,7 +14,7 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 
 @StepScope
 @RequiredArgsConstructor
@@ -28,14 +28,14 @@ public class VideoStatisticsTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 
-        ArrayList<VideoStatsProjection> videoStatsProjectionList = videoViewHistoryRepository.findVideoStatsByLocalDate(LocalDate.now().minusDays(1));
-        for (VideoStatsProjection videoStatsProjection : videoStatsProjectionList) {
+        List<VideoStats> videoStatsList = videoViewHistoryRepository.findVideoStatsByLocalDate(LocalDate.now().minusDays(1));
+        for (VideoStats videoStats : videoStatsList) {
             VideoStatistics videoStatistics = new VideoStatistics(
-                    videoRepository.findById(videoStatsProjection.getVideoId()).orElseThrow(
+                    videoRepository.findById(videoStats.getVideoId()).orElseThrow(
                             ()-> new IllegalArgumentException("존재하지 않는 영상입니다")
                     ),
-                    videoStatsProjection.getVideoView(),
-                    videoStatsProjection.getVideoPlaytime()
+                    videoStats.getVideoView(),
+                    videoStats.getVideoPlaytime()
             );
             videoStatisticsRepository.save(videoStatistics);
         }
