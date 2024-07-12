@@ -16,14 +16,14 @@ public class SchedulerConfig {
     private final Job adJob;
     private final JobLauncher jobLauncher;
 
-    public SchedulerConfig(@Qualifier("VIDEO_JOB")Job videoJob, @Qualifier("AD_JOB") Job adjob, JobLauncher jobLauncher) {
-            this.videoJob = videoJob;
-            this.adJob = adjob;
-            this.jobLauncher =jobLauncher;
+    public SchedulerConfig(@Qualifier("VIDEO_JOB") Job videoJob, @Qualifier("AD_JOB") Job adjob, JobLauncher jobLauncher) {
+        this.videoJob = videoJob;
+        this.adJob = adjob;
+        this.jobLauncher = jobLauncher;
     }
 
-    // @Scheduled(cron = "0 30 0 * * ? ")
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 30 0 * * ? ")
+    //@Scheduled(cron = "0 * * * * ?")
     public void jobLauncher() throws Exception {
         jobLauncher.run(videoJob, new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis()).toJobParameters());
