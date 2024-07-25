@@ -1,10 +1,10 @@
-package com.example.SpringBatch.job.step;
+package com.example.springbatch.batch.chunk;
 
-import com.example.SpringBatch.entity.Video;
-import com.example.SpringBatch.entity.calculate.VideoCalculate;
-import com.example.SpringBatch.entity.statisitcs.VideoStatistics;
-import com.example.SpringBatch.dto.VideoStats;
-import com.example.SpringBatch.repository.VideoRepository;
+import com.example.springbatch.dto.VideoStats;
+import com.example.springbatch.entity.Video;
+import com.example.springbatch.entity.calculate.VideoCalculate;
+import com.example.springbatch.entity.statisitcs.VideoStatistics;
+import com.example.springbatch.repository.read.Read_VideoRepository;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
@@ -16,7 +16,6 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -27,13 +26,16 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class ChunkVideoStep {
 
-    private final EntityManagerFactory serviceEntityManagerFactory;
-    private final VideoRepository videoRepository;
+    private final EntityManagerFactory writeEntityManagerFactory;
+    private final EntityManagerFactory readEntityManagerFactory;
+
+    private final Read_VideoRepository read_videoRepository;
+    private final PlatformTransactionManager writeTransactionManager;
 
     @JobScope
-    public Step videoStatistics(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+    public Step videoStatistics(JobRepository jobRepository) {
         return new StepBuilder("videoStatistics", jobRepository)
-                .<VideoStats, VideoStatistics>chunk(10, serviceTransactionManager)
+                .<VideoStats, VideoStatistics>chunk(10, writeTransactionManager)
                 .reader(videoStatisticsItemReader())
                 .processor(videoStatisticsItemProcessor())
                 .writer(videoStatisticsItemWriter())
@@ -48,7 +50,7 @@ public class ChunkVideoStep {
                 "GROUP BY v.video.videoId",VideoStats.class.getName());
         return new JpaPagingItemReaderBuilder<VideoStats>()
                 .name("videoStatisticsItemReader")
-                .entityManagerFactory(serviceEntityManagerFactory)
+                .entityManagerFactory(readEntityManagerFactory)
                 .queryString(queryString)
                 .parameterValues(Collections.singletonMap("findDate", LocalDate.now().minusDays(1)))
                 .pageSize(10)
@@ -58,7 +60,7 @@ public class ChunkVideoStep {
     @StepScope
     public ItemProcessor<VideoStats, VideoStatistics> videoStatisticsItemProcessor() {
         return item -> {
-            Video video = videoRepository.findById(item.getVideoId()).orElseThrow(
+            Video video = read_videoRepository.findById(item.getVideoId()).orElseThrow(
                     ()-> new IllegalArgumentException("Video not found")
             );
             return new VideoStatistics(video,item.getVideoView(),item.getVideoPlaytime());
@@ -68,15 +70,15 @@ public class ChunkVideoStep {
     @StepScope
     public JpaItemWriter<VideoStatistics> videoStatisticsItemWriter() {
         JpaItemWriter<VideoStatistics> jpaItemWriter = new JpaItemWriter<>();
-        jpaItemWriter.setEntityManagerFactory(serviceEntityManagerFactory);
+        jpaItemWriter.setEntityManagerFactory(writeEntityManagerFactory);
         return jpaItemWriter;
     }
 
 
     @JobScope
-    public Step videoCalculate(JobRepository jobRepository, @Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager) {
+    public Step videoCalculate(JobRepository jobRepository) {
         return new StepBuilder("videoCalculate",jobRepository)
-                .<VideoStatistics, VideoCalculate>chunk(10,serviceTransactionManager)
+                .<VideoStatistics, VideoCalculate>chunk(10,writeTransactionManager)
                 .reader(videoCalculateItemReader())
                 .processor(videoCalculateItemProcessor())
                 .writer(videoCalculateItemWriter())
@@ -87,7 +89,7 @@ public class ChunkVideoStep {
     public JpaPagingItemReader<VideoStatistics> videoCalculateItemReader() {
         return new JpaPagingItemReaderBuilder<VideoStatistics>()
                 .name("videoCalculateItemReader")
-                .entityManagerFactory(serviceEntityManagerFactory)
+                .entityManagerFactory(readEntityManagerFactory)
                 .queryString("SELECT v FROM VideoStatistics v WHERE v.createdAt = :findDate")
                 .parameterValues(Collections.singletonMap("findDate",LocalDate.now().minusDays(1)))
                 .pageSize(10)
@@ -109,7 +111,7 @@ public class ChunkVideoStep {
     @StepScope
     public JpaItemWriter<VideoCalculate> videoCalculateItemWriter() {
         JpaItemWriter<VideoCalculate> jpaItemWriter = new JpaItemWriter<>();
-        jpaItemWriter.setEntityManagerFactory(serviceEntityManagerFactory);
+        jpaItemWriter.setEntityManagerFactory(writeEntityManagerFactory);
         return jpaItemWriter;
     }
 

@@ -1,4 +1,4 @@
-package com.example.SpringBatch.dto;
+package com.example.springbatch.dto;
 
 import lombok.Data;
 

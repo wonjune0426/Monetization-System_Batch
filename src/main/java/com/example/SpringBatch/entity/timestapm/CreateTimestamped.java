@@ -1,5 +1,4 @@
-package com.example.SpringBatch.entity.timestapm;
-
+package com.example.springbatch.entity.timestapm;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

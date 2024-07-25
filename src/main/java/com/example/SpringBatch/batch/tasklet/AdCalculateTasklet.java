@@ -1,11 +1,11 @@
-package com.example.SpringBatch.job.tasklet;
+package com.example.springbatch.batch.tasklet;
 
-import com.example.SpringBatch.entity.VideoAd;
-import com.example.SpringBatch.entity.calculate.AdCalculate;
-import com.example.SpringBatch.entity.statisitcs.AdStatistics;
-import com.example.SpringBatch.repository.VideoAdRepository;
-import com.example.SpringBatch.repository.calculate.AdCalculateRepository;
-import com.example.SpringBatch.repository.statisitcs.AdStatisticsRepository;
+import com.example.springbatch.entity.VideoAd;
+import com.example.springbatch.entity.calculate.AdCalculate;
+import com.example.springbatch.entity.statisitcs.AdStatistics;
+import com.example.springbatch.repository.read.Read_VideoAdRepository;
+import com.example.springbatch.repository.read.Read_AdStatisticsRepository;
+import com.example.springbatch.repository.write.calculate.Write_AdCalculateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -22,15 +22,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdCalculateTasklet implements Tasklet {
 
-    private final AdStatisticsRepository adStatisticsRepository;
-    private final VideoAdRepository videoAdRepository;
-    private final AdCalculateRepository adCalculateRepository;
+    private final Read_AdStatisticsRepository read_adStatisticsRepository;
+    private final Read_VideoAdRepository read_videoAdRepository;
+
+    private final Write_AdCalculateRepository write_adCalculateRepository;
 
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        List<AdStatistics> adStatisticsList = adStatisticsRepository.findAllByCreatedAt(LocalDate.now().minusDays(1));
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
+        List<AdStatistics> adStatisticsList = read_adStatisticsRepository.findAllByCreatedAt(LocalDate.now().minusDays(1));
         for (AdStatistics adStatistics : adStatisticsList) {
-            VideoAd videoAd = videoAdRepository.findById(adStatistics.getVideoAd().getVideoAdId()).orElseThrow(
+            VideoAd videoAd = read_videoAdRepository.findById(adStatistics.getVideoAd().getVideoAdId()).orElseThrow(
                     ()-> new RuntimeException("Video Ad not found")
             );
 
@@ -39,7 +40,7 @@ public class AdCalculateTasklet implements Tasklet {
             long accumulateView = videoAd.getTotalView() - totalView;
 
             AdCalculate adCalculate = new AdCalculate(videoAd,calculateAmount(accumulateView,totalView));
-            adCalculateRepository.save(adCalculate);
+            write_adCalculateRepository.save(adCalculate);
         }
 
         return RepeatStatus.FINISHED;

@@ -1,10 +1,10 @@
-package com.example.SpringBatch.job.step;
+package com.example.springbatch.batch.chunk;
 
-import com.example.SpringBatch.dto.AdStats;
-import com.example.SpringBatch.entity.VideoAd;
-import com.example.SpringBatch.entity.calculate.AdCalculate;
-import com.example.SpringBatch.entity.statisitcs.AdStatistics;
-import com.example.SpringBatch.repository.VideoAdRepository;
+import com.example.springbatch.dto.AdStats;
+import com.example.springbatch.entity.VideoAd;
+import com.example.springbatch.entity.calculate.AdCalculate;
+import com.example.springbatch.entity.statisitcs.AdStatistics;
+import com.example.springbatch.repository.read.Read_VideoAdRepository;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
@@ -27,13 +27,16 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class ChunkAdStep {
 
-    private final EntityManagerFactory serviceEntityManagerFactory;
-    private final VideoAdRepository videoAdRepository;
+    private final EntityManagerFactory readEntityManagerFactory;
+    private final EntityManagerFactory writeEntityManagerFactory;
+
+    private final Read_VideoAdRepository read_videoAdRepository;
+    private final PlatformTransactionManager writeTransactionManager;
 
     @JobScope
-    public Step adStatistics(JobRepository jobRepository,@Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager){
+    public Step adStatistics(JobRepository jobRepository){
         return new StepBuilder("adStatistics",jobRepository)
-                .<AdStats, AdStatistics>chunk(10,serviceTransactionManager)
+                .<AdStats, AdStatistics>chunk(10,writeTransactionManager)
                 .reader(adStatisticsJpaPagingItemReader())
                 .processor(adStatisticsItemProcessor())
                 .writer(adStatisticsJpaItemWriter())
@@ -48,7 +51,7 @@ public class ChunkAdStep {
                 "GROUP BY v.videoAd.videoAdId", AdStats.class.getName());
         return new JpaPagingItemReaderBuilder<AdStats>()
                 .name("adStatsJpaPagingItemReader")
-                .entityManagerFactory(serviceEntityManagerFactory)
+                .entityManagerFactory(readEntityManagerFactory)
                 .queryString(queryString)
                 .parameterValues(Collections.singletonMap("findDate", LocalDate.now().minusDays(1)))
                 .pageSize(10)
@@ -58,7 +61,7 @@ public class ChunkAdStep {
     @StepScope
     public ItemProcessor<AdStats, AdStatistics> adStatisticsItemProcessor(){
         return item -> {
-            VideoAd videoAd = videoAdRepository.findById(item.getVideoAdId()).orElseThrow(
+            VideoAd videoAd = read_videoAdRepository.findById(item.getVideoAdId()).orElseThrow(
                     ()->new IllegalArgumentException("VideoAd not found")
             );
             return new AdStatistics(videoAd, item.getAdView());
@@ -68,14 +71,15 @@ public class ChunkAdStep {
     @StepScope
     public JpaItemWriter<AdStatistics> adStatisticsJpaItemWriter(){
         JpaItemWriter<AdStatistics> jpaItemWriter = new JpaItemWriter<>();
-        jpaItemWriter.setEntityManagerFactory(serviceEntityManagerFactory);
+        jpaItemWriter.setEntityManagerFactory(writeEntityManagerFactory);
         return jpaItemWriter;
     }
 
+
     @JobScope
-    public Step adCalculate(JobRepository jobRepository,@Qualifier("SERVICE_TRANSACTION_MANAGER") PlatformTransactionManager serviceTransactionManager){
+    public Step adCalculate(JobRepository jobRepository){
         return new StepBuilder("adCalculate",jobRepository)
-                .<AdStatistics, AdCalculate>chunk(10,serviceTransactionManager)
+                .<AdStatistics, AdCalculate>chunk(10,writeTransactionManager)
                 .reader(adCalculateJpaPagingItemReader())
                 .processor(adCalculateItemProcessor())
                 .writer(adCalculateJpaItemWriter())
@@ -86,7 +90,7 @@ public class ChunkAdStep {
     public JpaPagingItemReader<AdStatistics> adCalculateJpaPagingItemReader(){
         return new JpaPagingItemReaderBuilder<AdStatistics>()
                 .name("adCalculateJpaPagingItemReader")
-                .entityManagerFactory(serviceEntityManagerFactory)
+                .entityManagerFactory(readEntityManagerFactory)
                 .queryString("SELECT v FROM AdStatistics v WHERE v.createdAt = :findDate")
                 .parameterValues(Collections.singletonMap("findDate",LocalDate.now().minusDays(1)))
                 .pageSize(10)
@@ -106,7 +110,7 @@ public class ChunkAdStep {
     @JobScope
     public JpaItemWriter<AdCalculate> adCalculateJpaItemWriter(){
         JpaItemWriter<AdCalculate> jpaItemWriter = new JpaItemWriter<>();
-        jpaItemWriter.setEntityManagerFactory(serviceEntityManagerFactory);
+        jpaItemWriter.setEntityManagerFactory(writeEntityManagerFactory);
         return jpaItemWriter;
     }
 

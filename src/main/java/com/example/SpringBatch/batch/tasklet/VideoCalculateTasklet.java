@@ -1,11 +1,11 @@
-package com.example.SpringBatch.job.tasklet;
+package com.example.springbatch.batch.tasklet;
 
-import com.example.SpringBatch.entity.Video;
-import com.example.SpringBatch.entity.calculate.VideoCalculate;
-import com.example.SpringBatch.entity.statisitcs.VideoStatistics;
-import com.example.SpringBatch.repository.VideoRepository;
-import com.example.SpringBatch.repository.calculate.VideoCalculateRepository;
-import com.example.SpringBatch.repository.statisitcs.VideoStatisticsRepository;
+import com.example.springbatch.entity.Video;
+import com.example.springbatch.entity.calculate.VideoCalculate;
+import com.example.springbatch.entity.statisitcs.VideoStatistics;
+import com.example.springbatch.repository.read.Read_VideoRepository;
+import com.example.springbatch.repository.read.Read_VideoStatisticsRepository;
+import com.example.springbatch.repository.write.calculate.Write_VideoCalculateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -22,20 +22,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VideoCalculateTasklet implements Tasklet {
 
-    private final VideoRepository videoRepository;
-    private final VideoStatisticsRepository videoStatisticsRepository;
-    private final VideoCalculateRepository videoCalculateRepository;
+    private final Read_VideoRepository read_videoRepository;
+    private final Read_VideoStatisticsRepository read_videoStatisticsRepository;
+    private final Write_VideoCalculateRepository write_videoCalculateRepository;
 
 
     @Override
-    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
 
-        List<VideoStatistics> videoStatisticsList = videoStatisticsRepository.findAllByCreatedAt(LocalDate.now().minusDays(1));
+        List<VideoStatistics> videoStatisticsList = read_videoStatisticsRepository.findAllByCreatedAt(LocalDate.now().minusDays(1));
 
         for (VideoStatistics videoStatistics : videoStatisticsList) {
 
             // 해당 video 존재 여부 확인
-            Video video = videoRepository.findById(videoStatistics.getVideo().getVideoId()).orElseThrow(
+            Video video = read_videoRepository.findById(videoStatistics.getVideo().getVideoId()).orElseThrow(
                     ()-> new RuntimeException("Video not found")
             );
 
@@ -47,7 +47,7 @@ public class VideoCalculateTasklet implements Tasklet {
 
 
             VideoCalculate videoCalculate = new VideoCalculate(video,calculateAmount(accumulateView,todayView));
-            videoCalculateRepository.save(videoCalculate);
+            write_videoCalculateRepository.save(videoCalculate);
         }
 
 

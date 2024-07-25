@@ -1,6 +1,7 @@
-package com.example.SpringBatch.entity.calculate;
+package com.example.springbatch.entity.calculate;
 
-import com.example.SpringBatch.entity.VideoAd;
+
+import com.example.springbatch.entity.VideoAd;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,8 +28,8 @@ public class AdCalculate{
     @Column(nullable = false)
     private LocalDate createdAt = LocalDate.now().minusDays(1);
 
-    public AdCalculate(VideoAd videoAd, Long adAmount) {
+    public AdCalculate(VideoAd videoAd, Long adMount) {
         this.videoAd = videoAd;
-        this.adAmount = adAmount;
+        this.adAmount = adMount;
     }
 }

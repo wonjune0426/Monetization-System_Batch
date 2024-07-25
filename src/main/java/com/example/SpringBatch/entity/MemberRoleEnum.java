@@ -1,4 +1,4 @@
-package com.example.SpringBatch.entity;
+package com.example.springbatch.entity;
 
 import lombok.Getter;
 

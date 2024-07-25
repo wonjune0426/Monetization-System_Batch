@@ -1,6 +1,6 @@
-package com.example.SpringBatch.entity.statisitcs;
+package com.example.springbatch.entity.statisitcs;
 
-import com.example.SpringBatch.entity.Video;
+import com.example.springbatch.entity.Video;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +29,7 @@ public class VideoStatistics{
 
     @Column(nullable = false)
     private LocalDate createdAt = LocalDate.now().minusDays(1);
+
 
     public VideoStatistics(Video video, Long videoView, Long videoPlaytime) {
         this.video = video;

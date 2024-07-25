@@ -1,9 +1,5 @@
-package com.example.SpringBatch.job.step;
+package com.example.springbatch.batch.tasklet;
 
-import com.example.SpringBatch.job.tasklet.AdCalculateTasklet;
-import com.example.SpringBatch.job.tasklet.AdStatisticsTasklet;
-import com.example.SpringBatch.job.tasklet.VideoCalculateTasklet;
-import com.example.SpringBatch.job.tasklet.VideoStatisticsTasklet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;

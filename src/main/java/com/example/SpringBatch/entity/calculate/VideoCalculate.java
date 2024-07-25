@@ -1,6 +1,6 @@
-package com.example.SpringBatch.entity.calculate;
+package com.example.springbatch.entity.calculate;
 
-import com.example.SpringBatch.entity.Video;
+import com.example.springbatch.entity.Video;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

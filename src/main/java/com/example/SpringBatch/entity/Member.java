@@ -1,6 +1,6 @@
-package com.example.SpringBatch.entity;
+package com.example.springbatch.entity;
 
-import com.example.SpringBatch.entity.timestapm.MainTimestamped;
+import com.example.springbatch.entity.timestapm.MainTimestamped;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +13,11 @@ import lombok.NoArgsConstructor;
 public class Member extends MainTimestamped {
 
     @Id
-    private String memberId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long memberId;
+
+    @Column(nullable = false)
+    private String memberEmail;
 
     @Column(nullable = false)
     private String password;

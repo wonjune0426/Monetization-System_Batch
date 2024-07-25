@@ -1,6 +1,6 @@
-package com.example.SpringBatch.entity;
+package com.example.springbatch.entity;
 
-import com.example.SpringBatch.entity.timestapm.CreateTimestamped;
+import com.example.springbatch.entity.timestapm.CreateTimestamped;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

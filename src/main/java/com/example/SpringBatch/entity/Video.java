@@ -1,6 +1,6 @@
-package com.example.SpringBatch.entity;
+package com.example.springbatch.entity;
 
-import com.example.SpringBatch.entity.timestapm.MainTimestamped;
+import com.example.springbatch.entity.timestapm.MainTimestamped;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +18,7 @@ public class Video extends MainTimestamped {
     private UUID videoId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id",nullable = false)
     private Member member;
 
     @Column(nullable = false, length = 100)

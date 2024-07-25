@@ -1,6 +1,7 @@
-package com.example.SpringBatch.entity.statisitcs;
+package com.example.springbatch.entity.statisitcs;
 
-import com.example.SpringBatch.entity.VideoAd;
+
+import com.example.springbatch.entity.VideoAd;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
