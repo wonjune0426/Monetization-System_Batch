@@ -16,6 +16,8 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -30,6 +32,9 @@ public class ChunkVideoStep {
     private final EntityManagerFactory readEntityManagerFactory;
 
     private final Read_VideoRepository read_videoRepository;
+
+    @Autowired
+    @Qualifier("writeTransactionManager")
     private final PlatformTransactionManager writeTransactionManager;
 
     @JobScope
@@ -52,7 +57,7 @@ public class ChunkVideoStep {
                 .name("videoStatisticsItemReader")
                 .entityManagerFactory(readEntityManagerFactory)
                 .queryString(queryString)
-                .parameterValues(Collections.singletonMap("findDate", LocalDate.now().minusDays(1)))
+                .parameterValues(Collections.singletonMap("findDate", LocalDate.of(2024, 8,27)))
                 .pageSize(10)
                 .build();
     }
@@ -91,7 +96,7 @@ public class ChunkVideoStep {
                 .name("videoCalculateItemReader")
                 .entityManagerFactory(readEntityManagerFactory)
                 .queryString("SELECT v FROM VideoStatistics v WHERE v.createdAt = :findDate")
-                .parameterValues(Collections.singletonMap("findDate",LocalDate.now().minusDays(1)))
+                .parameterValues(Collections.singletonMap("findDate",LocalDate.of(2024, 8,27)))
                 .pageSize(10)
                 .build();
 

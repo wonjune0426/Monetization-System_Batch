@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 @RequiredArgsConstructor
 public class BatchDbConfig {
     @Bean
-    @ConfigurationProperties(prefix = "spring.datasource.batch")
+    @ConfigurationProperties(prefix = "spring.datasource.meta")
     public HikariConfig batchConfig() {
         return new HikariConfig();
     }

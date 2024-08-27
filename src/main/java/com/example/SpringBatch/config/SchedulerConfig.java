@@ -22,12 +22,21 @@ public class SchedulerConfig {
         this.jobLauncher = jobLauncher;
     }
 
-    @Scheduled(cron = "0 30 0 * * ? ")
-    //@Scheduled(cron = "0 * * * * ?")
+//    @Scheduled(cron = "0 30 0 * * ? ")
+    @Scheduled(cron = "0 * * * * ?")
     public void jobLauncher() throws Exception {
+        long beforeTime = System.currentTimeMillis();
         jobLauncher.run(videoJob, new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis()).toJobParameters());
+        long afterTime = System.currentTimeMillis();
+        long secDiffTime = (afterTime - beforeTime)/1000;
+        System.out.println("Video Job 경과시간: " + secDiffTime);
+
+        long beforeTime2 = System.currentTimeMillis();
         jobLauncher.run(adJob, new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis()).toJobParameters());
+        long afterTime2 = System.currentTimeMillis();
+        System.out.println("AD Job 경과시간: "+ (afterTime2 - beforeTime2)/1000);
+
     }
 }

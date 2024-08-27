@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -36,13 +37,13 @@ public class ReadDbConfig {
     @ConfigurationProperties(prefix = "spring.datasource.read")
     public HikariConfig readConfig() {return new HikariConfig();}
 
-    @Bean
+    @Bean(name="readDataSource")
     public DataSource readDataSource() {
         return new LazyConnectionDataSourceProxy(new HikariDataSource(readConfig()));
     }
 
-    @Bean
-    public LocalContainerEntityManagerFactoryBean readEntityManagerFactory(DataSource readDataSource) {
+    @Bean(name="readEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean readEntityManagerFactory(@Qualifier("readDataSource") DataSource readDataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(readDataSource);
         em.setJpaPropertyMap(
@@ -56,7 +57,7 @@ public class ReadDbConfig {
     }
 
     @Bean
-    public PlatformTransactionManager readTransactionManager(EntityManagerFactory readEntityManagerFactory) {
+    public PlatformTransactionManager readTransactionManager(@Qualifier("readEntityManagerFactory") EntityManagerFactory readEntityManagerFactory) {
         return new JpaTransactionManager(readEntityManagerFactory);
     }
 }

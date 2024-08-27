@@ -1,9 +1,10 @@
-package com.example.monetization.system.configuration;
+package com.example.springbatch.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -37,13 +38,13 @@ public class WriteDbConfig {
     @ConfigurationProperties(prefix = "spring.datasource.write")
     public HikariConfig writeConfig(){return new HikariConfig();}
 
-    @Bean
+    @Bean(name="writeDataSource")
     public DataSource writeDataSource(){
         return new LazyConnectionDataSourceProxy(new HikariDataSource(writeConfig()));
     }
 
-    @Bean
-    public LocalContainerEntityManagerFactoryBean writeEntityManagerFactory(DataSource writeDataSource) {
+    @Bean(name="writeEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean writeEntityManagerFactory(@Qualifier("writeDataSource") DataSource writeDataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(writeDataSource);
         em.setJpaPropertyMap(
@@ -56,8 +57,8 @@ public class WriteDbConfig {
         return em;
     }
 
-    @Bean
-    public PlatformTransactionManager writeTransactionManager(EntityManagerFactory writeEntityManagerFactory) {
+    @Bean(name="writeTransactionManager")
+    public PlatformTransactionManager writeTransactionManager(@Qualifier("writeEntityManagerFactory") EntityManagerFactory writeEntityManagerFactory) {
         return new JpaTransactionManager(writeEntityManagerFactory);
     }
 

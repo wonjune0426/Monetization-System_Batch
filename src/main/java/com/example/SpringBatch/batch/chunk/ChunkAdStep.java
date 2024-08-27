@@ -16,6 +16,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -31,6 +32,8 @@ public class ChunkAdStep {
     private final EntityManagerFactory writeEntityManagerFactory;
 
     private final Read_VideoAdRepository read_videoAdRepository;
+    @Autowired
+    @Qualifier("writeTransactionManager")
     private final PlatformTransactionManager writeTransactionManager;
 
     @JobScope
@@ -53,7 +56,7 @@ public class ChunkAdStep {
                 .name("adStatsJpaPagingItemReader")
                 .entityManagerFactory(readEntityManagerFactory)
                 .queryString(queryString)
-                .parameterValues(Collections.singletonMap("findDate", LocalDate.now().minusDays(1)))
+                .parameterValues(Collections.singletonMap("findDate", LocalDate.of(2024, 8,27)))
                 .pageSize(10)
                 .build();
     }
@@ -92,7 +95,7 @@ public class ChunkAdStep {
                 .name("adCalculateJpaPagingItemReader")
                 .entityManagerFactory(readEntityManagerFactory)
                 .queryString("SELECT v FROM AdStatistics v WHERE v.createdAt = :findDate")
-                .parameterValues(Collections.singletonMap("findDate",LocalDate.now().minusDays(1)))
+                .parameterValues(Collections.singletonMap("findDate",LocalDate.of(2024, 8,27)))
                 .pageSize(10)
                 .build();
     }
