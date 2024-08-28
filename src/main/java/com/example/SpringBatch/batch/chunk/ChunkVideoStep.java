@@ -40,7 +40,7 @@ public class ChunkVideoStep {
     @JobScope
     public Step videoStatistics(JobRepository jobRepository) {
         return new StepBuilder("videoStatistics", jobRepository)
-                .<VideoStats, VideoStatistics>chunk(10, writeTransactionManager)
+                .<VideoStats, VideoStatistics>chunk(5000, writeTransactionManager)
                 .reader(videoStatisticsItemReader())
                 .processor(videoStatisticsItemProcessor())
                 .writer(videoStatisticsItemWriter())
@@ -58,7 +58,7 @@ public class ChunkVideoStep {
                 .entityManagerFactory(readEntityManagerFactory)
                 .queryString(queryString)
                 .parameterValues(Collections.singletonMap("findDate", LocalDate.of(2024, 8,27)))
-                .pageSize(10)
+                .pageSize(5000)
                 .build();
     }
 
@@ -83,7 +83,7 @@ public class ChunkVideoStep {
     @JobScope
     public Step videoCalculate(JobRepository jobRepository) {
         return new StepBuilder("videoCalculate",jobRepository)
-                .<VideoStatistics, VideoCalculate>chunk(10,writeTransactionManager)
+                .<VideoStatistics, VideoCalculate>chunk(5000,writeTransactionManager)
                 .reader(videoCalculateItemReader())
                 .processor(videoCalculateItemProcessor())
                 .writer(videoCalculateItemWriter())
@@ -97,7 +97,7 @@ public class ChunkVideoStep {
                 .entityManagerFactory(readEntityManagerFactory)
                 .queryString("SELECT v FROM VideoStatistics v WHERE v.createdAt = :findDate")
                 .parameterValues(Collections.singletonMap("findDate",LocalDate.of(2024, 8,27)))
-                .pageSize(10)
+                .pageSize(5000)
                 .build();
 
     }
@@ -108,7 +108,6 @@ public class ChunkVideoStep {
             Video video = item.getVideo();
             Long accumulateView = video.getTotalView() - item.getVideoView();
             Long videoAmount = calculateAmount(accumulateView,item.getVideoView());
-
             return new VideoCalculate(video,videoAmount);
         };
     }

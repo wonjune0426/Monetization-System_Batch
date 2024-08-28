@@ -1,15 +1,14 @@
 package com.example.springbatch.config;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 @Configuration
-@EnableScheduling
+//@EnableScheduling
 public class SchedulerConfig {
 
     private final Job videoJob;
@@ -23,7 +22,8 @@ public class SchedulerConfig {
     }
 
 //    @Scheduled(cron = "0 30 0 * * ? ")
-    @Scheduled(cron = "0 * * * * ?")
+//    @Scheduled(cron = "0 * * * * ?")
+    @PostConstruct
     public void jobLauncher() throws Exception {
         long beforeTime = System.currentTimeMillis();
         jobLauncher.run(videoJob, new JobParametersBuilder()

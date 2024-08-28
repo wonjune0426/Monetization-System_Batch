@@ -39,7 +39,7 @@ public class ChunkAdStep {
     @JobScope
     public Step adStatistics(JobRepository jobRepository){
         return new StepBuilder("adStatistics",jobRepository)
-                .<AdStats, AdStatistics>chunk(10,writeTransactionManager)
+                .<AdStats, AdStatistics>chunk(5000,writeTransactionManager)
                 .reader(adStatisticsJpaPagingItemReader())
                 .processor(adStatisticsItemProcessor())
                 .writer(adStatisticsJpaItemWriter())
@@ -57,7 +57,7 @@ public class ChunkAdStep {
                 .entityManagerFactory(readEntityManagerFactory)
                 .queryString(queryString)
                 .parameterValues(Collections.singletonMap("findDate", LocalDate.of(2024, 8,27)))
-                .pageSize(10)
+                .pageSize(5000)
                 .build();
     }
 
@@ -82,7 +82,7 @@ public class ChunkAdStep {
     @JobScope
     public Step adCalculate(JobRepository jobRepository){
         return new StepBuilder("adCalculate",jobRepository)
-                .<AdStatistics, AdCalculate>chunk(10,writeTransactionManager)
+                .<AdStatistics, AdCalculate>chunk(5000,writeTransactionManager)
                 .reader(adCalculateJpaPagingItemReader())
                 .processor(adCalculateItemProcessor())
                 .writer(adCalculateJpaItemWriter())
@@ -96,7 +96,7 @@ public class ChunkAdStep {
                 .entityManagerFactory(readEntityManagerFactory)
                 .queryString("SELECT v FROM AdStatistics v WHERE v.createdAt = :findDate")
                 .parameterValues(Collections.singletonMap("findDate",LocalDate.of(2024, 8,27)))
-                .pageSize(10)
+                .pageSize(5000)
                 .build();
     }
 
@@ -104,6 +104,7 @@ public class ChunkAdStep {
     public ItemProcessor<AdStatistics,AdCalculate> adCalculateItemProcessor(){
         return item -> {
             VideoAd videoAd = item.getVideoAd();
+            System.out.println(videoAd.toString());
             Long accumulateView = videoAd.getTotalView() - item.getAdView();
             Long adMount = calculateAmount(accumulateView, item.getAdView());
             return new AdCalculate(videoAd,adMount);
